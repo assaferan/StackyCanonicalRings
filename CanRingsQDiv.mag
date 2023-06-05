@@ -1,0 +1,245 @@
+// A program to compute canonical rings of Q-divisors on P^1.
+
+// Choose a finite field of sufficiently high characteristic for speed.
+k := GF(101);
+F<a> := FunctionField(k);
+P<t> := PolynomialRing(F);
+
+// Input:
+// alpha: a set of weights for a Q-divisor
+
+function crr(alpha,points)
+  "---------------------------------------------------------------------------";
+  // "";
+  alpha;
+  s := &+alpha;
+  "Degree:",s;
+  if (s le 0) then
+    return 1;
+  end if;
+  n := #alpha;
+  
+  // Goal Hilbert series
+  Z<z> := FunctionField(Integers());
+  goal := (1 + &+[Floor(al)*z/(1-z) +
+      (al eq Floor(al) select 0 else (&+[z^Ceiling(i*b) : i in [1..Denominator(b)]]
+  / (1-z^Numerator(b)) where b is 1/(al - Floor(al)))) : al in alpha]) / (1 - z);
+  
+  Gmade := false;
+  G := 0; // dummy value
+  gens := [];
+  degs := [];
+  rellts := [];
+  rels := [];
+  
+  denom := 1;
+  dumbdenoms := {a - points[i] : i in [2..n-1]};
+  gallery := {};
+  
+  function straighten(Wlatpts, latpt)
+    for i in [1..#Wlatpts] do
+      if (&+[Max(Wlatpts[i,j], latpt[j]) : j in [1..#latpt]] le 1) then
+        return straighten(Remove(Wlatpts,i),
+          [Min(Wlatpts[i,j], latpt[j]) : j in [1..#latpt]]
+        );
+      end if;
+    end for;
+    return Wlatpts cat [latpt];
+  end function;
+  
+  procedure display(Wlatpts)
+    if #Wlatpts lt 2 then return; end if;
+    assert2 #Wlatpts eq 2;
+    if &+Wlatpts[2] eq -1 then
+      for i in [1..3] do
+        assert2 Wlatpts[1,i] eq Wlatpts[2,i] + 1;
+      end for;
+    else
+      assert2 &+Wlatpts[2] eq 0;
+      list := [-Wlatpts[1,i] + Wlatpts[2,i] + 1 : i in [1..3]];
+      if #[i : i in [1..3] | list[i] eq 0] lt 2 then
+        assert2 &+list eq -&+Wlatpts[1] + 4;
+      elif &+list ge -&+Wlatpts[1] + 3 then
+        printf "%o(%o)\n", list, -&+Wlatpts[1];
+      end if;
+    end if;
+  end procedure;
+  
+  for d in [1 .. 9^9] do
+    r := &+[Floor(aa*d) : aa in alpha];
+    if (r lt 0) then
+      continue;
+    end if;
+    // "---- d =", d, "----";
+    ringchg := false;
+    
+    mons := Gmade select
+    Reverse(Monomials(&+[G|mon : mon in MonomialsOfWeightedDegree(G,d) |
+    forall(rel){ rel : rel in rellts | not(IsDivisibleBy(mon,rel))}]))
+    else [];
+    V := VectorSpace(F,r+1);
+    
+    monvecs := [V![Coefficient(f,j) : j in [0..r]] where f is
+      &*[(t - points[i])^(Floor(d*alpha[i]) +
+          &+[Degree(mon,Rank(G)+1-j)*gens[j,i]
+      : j in [1..Rank(G)]]) : i in [1..n-1]] : mon in mons
+    ];
+    
+    goodidxs := [];
+    W := [];
+    Wlatpts := [];
+    for i in [1..#mons] do
+      if (monvecs[i] in W) then
+        // Relation
+        ringchg := true;
+        coor := Coordinates(W,monvecs[i]);
+        newden := Lcm([Denominator(c) : c in coor]);
+        denom := Lcm(denom, newden);
+        Append(~rellts, mons[i]);
+        Append(~rels, newden*(mons[i] - &+[coor[i] * mons[goodidxs[i]] :
+        i in [1..#coor]]));
+      else
+        // One of the r+1 basis elements
+        Append(~goodidxs, i);
+        W := VectorSpaceWithBasis(monvecs[goodidxs]);
+        latpt := [&+[Degree(mon,Rank(G)+1-j)*gens[j,k] : j in [1..#gens]]
+        where mon is mons[i] : k in [1..n-1]];
+        for i in [1..n-1] do
+          latpt[i] +:= Floor(d*alpha[i]);
+        end for;
+        Append(~latpt,-&+latpt);
+        Wlatpts := straighten(Wlatpts,latpt);
+        display(Wlatpts);
+      end if;
+    end for;
+    
+    // Fill out with generators
+    if (#goodidxs lt r+1) then
+      for q in [0..r] do
+        gen := [-Floor(alpha[1]*d) + q] cat
+        [-Floor(alpha[i]*d) : i in [2..n-1]] cat [d];
+        gvec := V![Coefficient((t - points[1])^q,j)
+        : j in [0..r]];
+        if (gvec in W) then
+          denom := Lcm([denom] cat [Denominator(c) :
+          c in Coordinates(W,gvec)]);
+        else
+          Append(~gens,gen);
+          Append(~monvecs,gvec);
+          Append(~goodidxs,#monvecs);
+          W := VectorSpaceWithBasis(monvecs[goodidxs]);
+          latpt := gen[1..n-1];
+          for i in [1..n-1] do
+            latpt[i] +:= Floor(d*alpha[i]);
+          end for;
+          Append(~latpt,-&+latpt);
+          Wlatpts := straighten(Wlatpts,latpt);
+          display(Wlatpts);
+        end if;
+      end for;
+      Gnew := PolynomialRing(F,Reverse([gen[n] : gen in gens]));
+      if (Gmade) then
+        f := hom<G -> Gnew | [Gnew.i : i in [Rank(Gnew)-Rank(G)+1..Rank(Gnew)]]>;
+        rellts := [Gnew | f(r) : r in rellts]; // careful if empty
+        rels := [Gnew | f(r) : r in rels];
+      else
+        rellts := [Gnew | ];
+        rels := rellts;
+      end if;
+      G := Gnew;
+      Gmade := true;
+      ringchg := true;
+      // Wlatpts;
+    end if;
+    
+    denom := Lcm([denom,Numerator(Determinant(Matrix(monvecs[goodidxs])))]);
+    
+    // Check if relations are done
+    if (ringchg) then
+      dif := HilbertSeries(Ideal(rellts)) - goal;
+      if (Denominator(dif) eq 1 and
+      forall(c){c : c in Coefficients(Numerator(dif)) | c ge 0}) then
+        ""; // get off outfalls line
+        "Generators:", [g[n] : g in gens];
+        "Groebner relations:", [WeightedDegree(r) : r in rellts];
+        print rellts;
+        fac := Factorization(denom);
+        for rec in fac do
+          if (rec[1] notin dumbdenoms) then
+            "############# Denominator:", rec[1];
+            Include(~dumbdenoms, rec[1]);
+          end if;
+        end for;
+        
+        minbas := MinimalBasis(Ideal(rels));
+        "Minimal relations: ", [Degree(r) : r in minbas];
+        
+        if (#minbas lt #rels) then
+          // Reverse relations in each degree
+          bins := [[]^^Degree(rels[#rels])];
+          for r in rels do
+            Insert(~bins[Degree(r)], 1, r);
+          end for;
+          rels := &cat bins;
+          
+          // What's missing?
+          missidxs := [i : i in [1..#rels] | rels[i] notin minbas];
+          assert2 #missidxs eq #rels - #minbas;
+          
+          A := PolynomialRing(k);
+          R := PolynomialRing(A, Reverse([g[n] : g in gens]));
+          Is := [R!rel : rel in rels];
+          for i in missidxs do
+            basis := Basis(EliminationIdeal(ColonIdeal(Ideal(Is[1..i-1]),
+            Ideal([Is[i]])),#gens));
+            assert2 #basis eq 1;
+            denom := Lcm(denom,basis[1]);
+          end for;
+          
+          fac := Factorization(denom);
+          for rec in fac do
+            if (rec[1] notin dumbdenoms) then
+              "$$$$$$$$$$$$$ Relation denominator:", rec[1];
+              Include(~dumbdenoms, rec[1]);
+            end if;
+          end for;
+        end if;
+        return denom;
+      end if;
+    end if;
+    //    printf "|";
+  end for;
+  "Failed to find all relations";
+  return 1;
+end function;
+
+procedure cr(alpha)
+  denom := crr(alpha, [a] cat [0..#alpha-3]);
+  fac := Factorization(denom);
+  for rec in fac do
+    a0 := a - F!rec[1];
+    if (a0 in k and a0 notin [0..#alpha-3]) then
+      printf "a = -%o:", -a0;
+      assert2 1 eq crr(alpha, [a0] cat [0..#alpha-3]);
+    end if;
+  end for;
+end procedure;
+
+// Test case: All Q-divisors with bounded denominator, n points, 0 < deg D <= 1.
+
+procedure close_cases(n, max_denom)
+  fracs := {a/b : a in [1..b-1], b in [1..max_denom]};
+  aas := Sort(Setseq(Multisets(fracs,n)));
+  i := 0;
+  
+  while i lt #aas do
+    i +:= 1;
+    print "";
+    print "Case", i, "of", #aas;
+    aaa := [x : x in aas[i]]; aaa[1] -:= Floor(&+aaa);
+    cr(aaa);
+  end while;
+end procedure;
+
+cr([1/2, 2/3, 6/7 - 2])
+// close_cases(6,3)
