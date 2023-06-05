@@ -3,39 +3,45 @@
 // Choose a finite field of sufficiently high characteristic for speed.
 k := GF(101);
 F<a> := FunctionField(k);
+A<a_> := PolynomialRing(k);
 P<t> := PolynomialRing(F);
 
 // Input:
-// alpha: a set of weights for a Q-divisor
+// alpha: a system of weights for a Q-divisor
 
-function crr(alpha,points)
+function crr(alpha, points)
   "---------------------------------------------------------------------------";
   // "";
-  alpha;
+  print "Computing the ring corresponding to a divisor on P^1 of";
+  print "signature", alpha, "at points", points;
   s := &+alpha;
-  "Degree:",s;
+  "Degree:", s;
   if (s le 0) then
     return 1;
   end if;
   n := #alpha;
   
-  // Goal Hilbert series
+  // Goal Hilbert series. We will keep adding generators until we reach this goal.
   Z<z> := FunctionField(Integers());
   goal := (1 + &+[Floor(al)*z/(1-z) +
       (al eq Floor(al) select 0 else (&+[z^Ceiling(i*b) : i in [1..Denominator(b)]]
   / (1-z^Numerator(b)) where b is 1/(al - Floor(al)))) : al in alpha]) / (1 - z);
   
-  Gmade := false;
-  G := 0; // dummy value
+  
+  // The free ring on the known generators.
+  G := PolynomialRing(F, 0);
+  Gmade := true;
   gens := [];
   degs := [];
   rellts := [];
   rels := [];
   
   denom := 1;
-  dumbdenoms := {a - points[i] : i in [2..n-1]};
+  // Denominators are 
+  known_denoms := {a - points[i] : i in [2..n-1]};
   gallery := {};
   
+  // Helper functions.
   function straighten(Wlatpts, latpt)
     for i in [1..#Wlatpts] do
       if (&+[Max(Wlatpts[i,j], latpt[j]) : j in [1..#latpt]] le 1) then
@@ -65,6 +71,7 @@ function crr(alpha,points)
     end if;
   end procedure;
   
+  // Examine each degree.
   for d in [1 .. 9^9] do
     r := &+[Floor(aa*d) : aa in alpha];
     if (r lt 0) then
@@ -73,7 +80,7 @@ function crr(alpha,points)
     // "---- d =", d, "----";
     ringchg := false;
     
-    mons := Gmade select
+    mons := #gens gt 0 select
     Reverse(Monomials(&+[G|mon : mon in MonomialsOfWeightedDegree(G,d) |
     forall(rel){ rel : rel in rellts | not(IsDivisibleBy(mon,rel))}]))
     else [];
@@ -137,10 +144,12 @@ function crr(alpha,points)
           display(Wlatpts);
         end if;
       end for;
+      gnames := ["g" * Sprint(i) : i in [#gens..1 by -1]];
       Gnew := PolynomialRing(F,Reverse([gen[n] : gen in gens]));
+      AssignNames(~Gnew, gnames);
       if (Gmade) then
         f := hom<G -> Gnew | [Gnew.i : i in [Rank(Gnew)-Rank(G)+1..Rank(Gnew)]]>;
-        rellts := [Gnew | f(r) : r in rellts]; // careful if empty
+        rellts := [Gnew | f(r) : r in rellts];
         rels := [Gnew | f(r) : r in rels];
       else
         rellts := [Gnew | ];
@@ -149,7 +158,7 @@ function crr(alpha,points)
       G := Gnew;
       Gmade := true;
       ringchg := true;
-      // Wlatpts;
+      // Wlatpts; //
     end if;
     
     denom := Lcm([denom,Numerator(Determinant(Matrix(monvecs[goodidxs])))]);
@@ -162,12 +171,15 @@ function crr(alpha,points)
         ""; // get off outfalls line
         "Generators:", [g[n] : g in gens];
         "Groebner relations:", [WeightedDegree(r) : r in rellts];
+        "Initial ideal:";
         print rellts;
+        // "Relations are:";
+        // print rels;
         fac := Factorization(denom);
         for rec in fac do
-          if (rec[1] notin dumbdenoms) then
-            "############# Denominator:", rec[1];
-            Include(~dumbdenoms, rec[1]);
+          if (rec[1] notin known_denoms) then
+            "### Generators invalid if the following vanishes:", A!rec[1];
+            Include(~known_denoms, rec[1]);
           end if;
         end for;
         
@@ -186,8 +198,7 @@ function crr(alpha,points)
           missidxs := [i : i in [1..#rels] | rels[i] notin minbas];
           assert2 #missidxs eq #rels - #minbas;
           
-          A := PolynomialRing(k);
-          R := PolynomialRing(A, Reverse([g[n] : g in gens]));
+          R<[g]> := PolynomialRing(A, Reverse([g[n] : g in gens]));
           Is := [R!rel : rel in rels];
           for i in missidxs do
             basis := Basis(EliminationIdeal(ColonIdeal(Ideal(Is[1..i-1]),
@@ -198,9 +209,9 @@ function crr(alpha,points)
           
           fac := Factorization(denom);
           for rec in fac do
-            if (rec[1] notin dumbdenoms) then
-              "$$$$$$$$$$$$$ Relation denominator:", rec[1];
-              Include(~dumbdenoms, rec[1]);
+            if (rec[1] notin known_denoms) then
+              "$$$ Relations invalid if the following vanishes:", A!rec[1];
+              Include(~known_denoms, rec[1]);
             end if;
           end for;
         end if;
@@ -236,10 +247,11 @@ procedure close_cases(n, max_denom)
     i +:= 1;
     print "";
     print "Case", i, "of", #aas;
-    aaa := [x : x in aas[i]]; aaa[1] -:= Floor(&+aaa);
+    aaa := [x : x in aas[i]]; aaa[1] -:= -1 + Ceiling(&+aaa);
     cr(aaa);
   end while;
 end procedure;
 
-cr([1/2, 2/3, 6/7 - 2]);
-// close_cases(6,3);
+cr([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
+crr([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5], [7/3,0,1,2,3,4]);
+close_cases(4, 3)
