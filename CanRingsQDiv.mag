@@ -242,4 +242,3 @@ procedure close_cases(n, max_denom)
 end procedure;
 
 cr([1/2, 2/3, 6/7 - 2]);
-// close_cases(6,3)
