@@ -1,3 +1,5 @@
+*~
+*.auto
 *.sig
 *.swp
 *.DS_Store
