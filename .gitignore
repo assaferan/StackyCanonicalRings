@@ -3,3 +3,4 @@
 *.sig
 *.swp
 *.DS_Store
+.magma-scan
