@@ -1,10 +1,16 @@
-// A program to compute canonical rings of Q-divisors on P^1.
+/*
+can_ring_info: A program for computing canonical rings of Q-divisors on P^1.
 
+Input:
+alpha: a sequence of n >= 1 rational weights
+points: a system of n - 1 points (the first point is always oo), 
+Print: whether to print information about what's found (default true)
+Factor: whether to work out the locus of exceptional locations of the points
+where the presentation found may not hold.
 
-// Input:
-// alpha: a system of weights for a Q-divisor
-// points: a set of points 
-// 
+Output: The canonical ring, presented as a quotient of a weighted polynomial 
+ring.
+*/
 
 function can_ring_info(alpha, points: Print := true, Factor := false)
   
@@ -159,6 +165,9 @@ function can_ring_info(alpha, points: Print := true, Factor := false)
   end while;
 
   minbas := MinimalBasis(Ideal(rels));
+  
+  // Rectify the reversal of generator order (introduced earlier to get correct
+  // monomial order).
   Gback<[g]> := PolynomialRing(F,[gdiv[n] : gdiv in gdivs]);
   back := hom<G -> Gback | [Gback.i : i in [#gdivs..1 by -1]]>;
   
@@ -182,20 +191,37 @@ function can_ring_info(alpha, points: Print := true, Factor := false)
     "Minimal relations: ", [Degree(r) : r in minbas];
   end if;
   
-  // Rectify the reversal of generator order (introduced earlier to get correct
-  // monomial order).
-  Quo := quo<Gback | back(minbas)>;
-  return Quo;
+  CRing := quo<Gback | back(minbas)>;
+  return CRing;
 end function;
 
+/*
+A reasonably general cross-section: Computes the canonical ring over a finite
+field for the given point weights, with points [oo, a, 0, 1, ..., n-3] where a
+is a formal parameter.
+
+Input:
+alpha: a sequence of n >= 1 rational weights
+
+Output: the canonical ring
+*/
 function can_ring_one_moving_pt(alpha)
-  // Choose a finite field of sufficiently high characteristic for speed.
-  k := /*Rationals();*/ GF(101);
+  // Choose a finite field of sufficiently high characteristic.
+  k := GF(101);
   F<a> := FunctionField(k);
 
   return can_ring_info(alpha, [a] cat [0..#alpha-3]: Factor := true);
 end function;
 
+/*
+A thorough exploration of canonical rings: Computes the canonical ring for the 
+given point weights, with points given by formal parameters.
+
+Input:
+alpha: a sequence of n >= 1 rational weights
+
+Output: the canonical ring
+*/
 function can_ring_all_moving_pts(alpha)
   K<[a]> := FunctionField(Rationals(), #alpha);
   return can_ring_info([0] cat alpha, [a[i] : i in [1..#alpha]]:
@@ -218,6 +244,9 @@ procedure close_cases(n, max_denom)
   end while;
 end procedure;
 
+/*
+Test cases.
+*/
 can_ring_info([1/2, 2/3, 6/7 - 2], [0/1, 1]: Print := false, Factor := true);
 Qsqrt3<sqrt3> := RadicalExtension(Rationals(), 2, 3);
 can_ring_info([1/3, 1/5, 1/4, 1/4 - 1], [0, 1, sqrt3]: Print := false);
