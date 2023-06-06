@@ -11,7 +11,7 @@ function LogDivisorDelta2Hyperelliptic(h)
     mons := [x[i]*y[j] : i,j in [1..h-2] | (i ne h-2) or (j ne h-2)];
     return x_mons cat mons cat y_mons;
 end function;
-c
+
 function LogDivisorDelta2NonHyperelliptic(h) 
     ZZ := Integers();
     R := PolynomialRing(ZZ, 2*h-2);
@@ -25,10 +25,9 @@ function LogDivisorDelta2NonHyperelliptic(h)
     x_mons := x_mons_2 cat x_mons_3;
     mons := [y*x[i] : i in [1..h-1]];
     return x_mons cat mons cat [y^2, x[h-2]^3*x[h-1]];
-end function;
-				 
+end function;				 
 
-intrinsic LogDivisorDelta2(g::RngIntElt, hyperelliptic::BoolElt)
+intrinsic LogDivisorDelta2(g::RngIntElt, hyperelliptic::BoolElt) -> SeqEnum
 {Returns the (pointed) generic initial ideal for a classical log divisor with delta = 2 and g ge 2.}
   require g ge 2 : "The genus must be at least 2.";
   h := g + 1;
