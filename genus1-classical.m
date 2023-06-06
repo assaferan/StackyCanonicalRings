@@ -8,7 +8,7 @@
 
 **************************************************/
 
-intrinsic GenusOnePointedGenericInitialIdeal(deg_delta)
+intrinsic GenusOnePointedGenericInitialIdeal(deg_delta::RngIntElt) -> SeqEnum
 {
   On input deg_delta := deg(\Delta) where \Delta is a divisor on 
   X, we output the pointed generic initial ideal gin_<(I;S).
