@@ -1,6 +1,7 @@
 intrinsic gin(g::RngIntElt, hyp::BoolElt) -> Any
   {Generic initial ideal for a curve of genus >= 3 that is nonhyperelliptic and has no stacky points and no log divisor.}
 
+  assert g ge 3;
   k := Rationals();
   if not hyp then // nonhyperelliptic, Theorem 2.8.1
     R<[x]> := PolynomialRing(k,g);
@@ -20,10 +21,10 @@ intrinsic gin(g::RngIntElt, hyp::BoolElt) -> Any
     gens := [];
     for i := 1 to g-2 do
       for j := i to g-2 do
-        Append(~gens x[i]*x[j]);
-        Append(~gens y[i]*y[j]);
+        Append(~gens, x[i]*x[j]);
+        Append(~gens, y[i]*y[j]);
         if [i, j] ne [g-2, g-2] then
-          Append(~gens y[i]*x[j]);
+          Append(~gens, y[i]*x[j]);
         end if;
       end for;
     end for;
