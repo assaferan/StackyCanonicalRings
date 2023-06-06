@@ -5,15 +5,22 @@
 // alpha: a system of weights for a Q-divisor
 // points
 
-procedure can_ring_info(alpha, points)
+function can_ring_info(alpha, points)
+  
+  // The field/ring over which we are working.
+  F := Universe(points);
+  P<t> := PolynomialRing(F); // for functions in the linear systems
+  
+  
   "---------------------------------------------------------------------------";
   // "";
   print "Computing the ring corresponding to a divisor on P^1 of";
-  print "signature", alpha, "at points", points;
+  print "signature", alpha, "at points", <Infinity()> cat <pt : pt in points>;
+  assert #points eq #alpha - 1;
   s := &+alpha;
   "Degree:", s;
   if (s le 0) then
-    return; // the canonical ring is trivial
+    return F; // the canonical ring is trivial
   end if;
   n := #alpha;
   
@@ -27,10 +34,6 @@ procedure can_ring_info(alpha, points)
       (al eq Floor(al) select 0 else (&+[z^Ceiling(i*b) : i in [1..Denominator(b)]]
   / (1-z^Numerator(b)) where b is 1/(al - Floor(al)))) : al in alpha]) / (1 - z);
   
-  // The field/ring over which we are working.
-  F := Universe(points);
-  P<t> := PolynomialRing(F); // for functions in the linear systems
-  
   try
     A := Parent(Numerator(F.1));
     try
@@ -41,7 +44,6 @@ procedure can_ring_info(alpha, points)
     "Denominator factorization enabled";
   catch e
     factor := false;
-    error e;
   end try;
   
   
@@ -53,8 +55,8 @@ procedure can_ring_info(alpha, points)
   
   if factor then
     known_denoms := { A | };
-    for i in [1..n-1] do
-      for j in [i+1..n] do
+    for i in [1..n-2] do
+      for j in [i+1..n-1] do
         denom := Numerator(points[j] - points[i]);
         fac := Factorization(denom);
         for rec in fac do
@@ -111,7 +113,7 @@ procedure can_ring_info(alpha, points)
       for q in [0..r] do
         gdiv := [-Floor(alpha[1]*d) + q] cat
         [-Floor(alpha[i]*d) : i in [2..n-1]] cat [d];
-        gen := V![Coefficient((t - points[1])^q,j)
+        gen := V![Coefficient(t^q,j)
         : j in [0..r]];
         if (gen in W) then
           if factor then 
@@ -153,9 +155,11 @@ procedure can_ring_info(alpha, points)
   "Generators:", [g[n] : g in gdivs];
   "Groebner relations:", [WeightedDegree(r) : r in initials];
   "Initial ideal:";
-  print initials;
+  Gback<[g]> := PolynomialRing(F,[gdiv[n] : gdiv in gdivs]);
+  back := hom<G -> Gback | [Gback.i : i in [#gdivs..1 by -1]]>;
+  print back(initials);
   /* "Relations are:";
-  print rels; */
+  print back(rels); */
   if factor then
     fac := Factorization(denom);
     for rec in fac do
@@ -169,21 +173,25 @@ procedure can_ring_info(alpha, points)
   minbas := MinimalBasis(Ideal(rels));
   "Minimal relations: ", [Degree(r) : r in minbas];
   
-  // return known_denoms;
-end procedure;
+  // Rectify the reversal of generator order (introduced earlier to get correct
+  // monomial order).
+  
+  Quo := quo<Gback | back(minbas)>;
+  return Quo;
+end function;
 
-procedure can_ring_one_moving_pt(alpha)
+function can_ring_one_moving_pt(alpha)
   // Choose a finite field of sufficiently high characteristic for speed.
   k := /*Rationals();*/ GF(101);
   F<a> := FunctionField(k);
 
-  can_ring_info(alpha, [a] cat [0..#alpha-2]);
-end procedure;
+  return can_ring_info(alpha, [a] cat [0..#alpha-3]);
+end function;
 
-procedure can_ring_all_moving_pts(alpha)
+function can_ring_all_moving_pts(alpha)
   K<[a]> := FunctionField(Rationals(), #alpha);
-  can_ring_info(alpha, [a[i] : i in [1..#alpha]]);
-end procedure;
+  return can_ring_info([0] cat alpha, [a[i] : i in [1..#alpha]]);
+end function;
 
 // Test case: All Q-divisors with bounded denominator, n points, 0 < deg D <= 1.
 procedure close_cases(n, max_denom)
@@ -196,11 +204,12 @@ procedure close_cases(n, max_denom)
     print "";
     print "Case", i, "of", #as;
     alpha := [x : x in as[i]]; alpha[1] -:= -1 + Ceiling(&+alpha);
-    can_ring_all_moving_pts(alpha);
+    _ := can_ring_all_moving_pts(alpha);
   end while;
 end procedure;
 
+can_ring_info([1/2, 2/3, 6/7 - 2], [0/1, 1]);
 can_ring_one_moving_pt([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
 can_ring_all_moving_pts([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
-can_ring_info([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5], [7/3,0,1,2,3,4]);
+can_ring_info([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5], [7/3,0,1,2,3]);
 close_cases(4, 3)
