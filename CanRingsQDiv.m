@@ -3,22 +3,25 @@
 
 // Input:
 // alpha: a system of weights for a Q-divisor
-// points
+// points: a set of points 
+// 
 
-function can_ring_info(alpha, points)
+function can_ring_info(alpha, points: Print := true, Factor := false)
   
   // The field/ring over which we are working.
   F := Universe(points);
   P<t> := PolynomialRing(F); // for functions in the linear systems
   
-  
-  "---------------------------------------------------------------------------";
-  // "";
-  print "Computing the ring corresponding to a divisor on P^1 of";
-  print "signature", alpha, "at points", <Infinity()> cat <pt : pt in points>;
+  if Print then
+    "-------------------------------------------------------------------------";
+    print "Computing the ring corresponding to a divisor on P^1 of";
+    print "signature", alpha, "at points", <Infinity()> cat <pt : pt in points>;
+  end if;
   assert #points eq #alpha - 1;
   s := &+alpha;
-  "Degree:", s;
+  if Print then
+    "Degree:", s;
+  end if;
   if (s le 0) then
     return F; // the canonical ring is trivial
   end if;
@@ -34,18 +37,18 @@ function can_ring_info(alpha, points)
       (al eq Floor(al) select 0 else (&+[z^Ceiling(i*b) : i in [1..Denominator(b)]]
   / (1-z^Numerator(b)) where b is 1/(al - Floor(al)))) : al in alpha]) / (1 - z);
   
-  try
-    A := Parent(Numerator(F.1));
+  if Factor then
     try
-      AssignNames(~A, [Sprint(F.i) : i in [1..Rank(F)]]);
-    catch e;
+      A := Parent(Numerator(F.1));
+      try
+        AssignNames(~A, [Sprint(F.i) : i in [1..Rank(F)]]);
+      catch e;
+      end try;
+      Factor := true;
+    catch e
+      "warning: denominator factorization disabled";
     end try;
-    factor := true;
-    "Denominator factorization enabled";
-  catch e
-    factor := false;
-  end try;
-  
+  end if;
   
   // The free ring on the known generators.
   G := PolynomialRing(F, 0);
@@ -53,7 +56,7 @@ function can_ring_info(alpha, points)
   initials := [];
   rels := [];
   
-  if factor then
+  if Factor then
     known_denoms := { A | };
     for i in [1..n-2] do
       for j in [i+1..n-1] do
@@ -97,7 +100,9 @@ function can_ring_info(alpha, points)
         ringchg := true;
         coor := Coordinates(W,monvecs[i]);
         newden := Lcm([Denominator(c) : c in coor]);
-        denom := Lcm(denom, newden);
+        if Factor then
+          denom := Lcm(denom, newden);
+        end if;
         Append(~initials, mons[i]);
         Append(~rels, newden*(mons[i] - &+[coor[i] * mons[gen_idxs[i]] :
         i in [1..#coor]]));
@@ -116,7 +121,7 @@ function can_ring_info(alpha, points)
         gen := V![Coefficient(t^q,j)
         : j in [0..r]];
         if (gen in W) then
-          if factor then 
+          if Factor then 
             denom := Lcm([denom] cat [Denominator(c) :
               c in Coordinates(W,gen)]
             );
@@ -139,7 +144,9 @@ function can_ring_info(alpha, points)
       ringchg := true;
     end if;
     
-    denom := Lcm([denom,Numerator(Determinant(Matrix(monvecs[gen_idxs])))]);
+    if Factor then
+      denom := Lcm([denom,Numerator(Determinant(Matrix(monvecs[gen_idxs])))]);
+    end if;
     
     if (ringchg) then
       // Check if we're done
@@ -151,31 +158,32 @@ function can_ring_info(alpha, points)
     end if;
   end while;
 
-  // Print the result found.
-  "Generators:", [g[n] : g in gdivs];
-  "Groebner relations:", [WeightedDegree(r) : r in initials];
-  "Initial ideal:";
+  minbas := MinimalBasis(Ideal(rels));
   Gback<[g]> := PolynomialRing(F,[gdiv[n] : gdiv in gdivs]);
   back := hom<G -> Gback | [Gback.i : i in [#gdivs..1 by -1]]>;
-  print back(initials);
-  /* "Relations are:";
-  print back(rels); */
-  if factor then
-    fac := Factorization(denom);
-    for rec in fac do
-      if (rec[1] notin known_denoms) then
-        "### Generators invalid if the following vanishes:", A!rec[1];
-        Include(~known_denoms, rec[1]);
-      end if;
-    end for;
-  end if;
   
-  minbas := MinimalBasis(Ideal(rels));
-  "Minimal relations: ", [Degree(r) : r in minbas];
+  // Print the result found.
+  if Print then
+    "Generators:", [g[n] : g in gdivs];
+    "Groebner relations:", [WeightedDegree(r) : r in initials];
+    "Initial ideal:";
+    print back(initials);
+    /* "Relations are:";
+    print back(rels); */
+    if Factor then
+      fac := Factorization(denom);
+      for rec in fac do
+        if (rec[1] notin known_denoms) then
+          "### Generators invalid if the following vanishes:", A!rec[1];
+          Include(~known_denoms, rec[1]);
+        end if;
+      end for;
+    end if;
+    "Minimal relations: ", [Degree(r) : r in minbas];
+  end if;
   
   // Rectify the reversal of generator order (introduced earlier to get correct
   // monomial order).
-  
   Quo := quo<Gback | back(minbas)>;
   return Quo;
 end function;
@@ -208,8 +216,10 @@ procedure close_cases(n, max_denom)
   end while;
 end procedure;
 
-can_ring_info([1/2, 2/3, 6/7 - 2], [0/1, 1]);
+can_ring_info([1/2, 2/3, 6/7 - 2], [0/1, 1]: Print := false, Factor := true);
+_<sqrt3> := RadicalExtension(Rationals(), 2, 3);
+can_ring_info([1/3, 1/5, 1/4, 1/4 - 1], [0, 1, sqrt3]: Print := false);
 can_ring_one_moving_pt([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
 can_ring_all_moving_pts([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
-can_ring_info([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5], [7/3,0,1,2,3]);
+can_ring_info([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5], [7/3,0,1,2,3]: Factor := true);
 close_cases(4, 3)
