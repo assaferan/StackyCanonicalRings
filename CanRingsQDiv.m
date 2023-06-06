@@ -193,12 +193,14 @@ function can_ring_one_moving_pt(alpha)
   k := /*Rationals();*/ GF(101);
   F<a> := FunctionField(k);
 
-  return can_ring_info(alpha, [a] cat [0..#alpha-3]);
+  return can_ring_info(alpha, [a] cat [0..#alpha-3]: Factor := true);
 end function;
 
 function can_ring_all_moving_pts(alpha)
   K<[a]> := FunctionField(Rationals(), #alpha);
-  return can_ring_info([0] cat alpha, [a[i] : i in [1..#alpha]]);
+  return can_ring_info([0] cat alpha, [a[i] : i in [1..#alpha]]:
+    Factor := true
+  );
 end function;
 
 // Test case: All Q-divisors with bounded denominator, n points, 0 < deg D <= 1.
@@ -217,7 +219,7 @@ procedure close_cases(n, max_denom)
 end procedure;
 
 can_ring_info([1/2, 2/3, 6/7 - 2], [0/1, 1]: Print := false, Factor := true);
-_<sqrt3> := RadicalExtension(Rationals(), 2, 3);
+Qsqrt3<sqrt3> := RadicalExtension(Rationals(), 2, 3);
 can_ring_info([1/3, 1/5, 1/4, 1/4 - 1], [0, 1, sqrt3]: Print := false);
 can_ring_one_moving_pt([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
 can_ring_all_moving_pts([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
