@@ -36,8 +36,8 @@ intrinsic GenusOnePointedGenericInitialIdeal(deg_delta::RngIntElt) -> SeqEnum
     else
         // An n-covering, genus one normal curve
         
-        P<[x]> := PolynomialRing(ZZ, [1 : 1 in [1..deg_delta]]);
-        l1 := [[x[i]*x[j] : i in [1..j-1] | <i,j> ne <deg_delta-2, deg_delta-1> ] : j in 1..deg_delta-1];
+        P<[x]> := PolynomialRing(ZZ, [1 : i in [1..deg_delta]]);
+        l1 := [[x[i]*x[j] : i in [1..j-1] | <i,j> ne <deg_delta-2, deg_delta-1> ] : j in [1..deg_delta-1]];
         l2 := [x[deg_delta-2]^2*x[deg_delta-1]];
         return l1 cat l2;
     end if;
