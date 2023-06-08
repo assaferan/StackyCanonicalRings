@@ -178,7 +178,8 @@ classical log divisor with delta = 2 and g ge 2.
 end function;
 
 intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::RngIntElt,hyp::BoolElt) -> SeqEnum
-{Returns the (pointed) generic initial ideal for the base cases in VZB} 
+  {Returns the (pointed) generic initial ideal for the base cases in VZB} 
+
     r := #e;
     if r eq 0 then
         if g eq 1 then
@@ -201,19 +202,18 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
     Error("Information does not define a base case");
 end intrinsic;
 
-intrinsic GinBaseCase(g::RngIntElt, r::RngIntElt, delta::RngIntElt, hyp::BoolElt) -> Any
+intrinsic GinBaseCase(g::RngIntElt, e::SeqEnum, delta::RngIntElt, hyp::BoolElt) -> Any
   {}
-    return GenericInitialIdealBaseCase(g,r,delta,hyp);
+    return GenericInitialIdealBaseCase(g,e,delta,hyp);
 end intrinsic;
 
 intrinsic GenericInitialIdealBaseCase(s::Rec) -> Any
   {}
   g := s`genus;
   es := s`stacky_orders;
-  r := #es;
   delta := s`log_degree;
   hyp := s`hyp;
-  return GenericInitialIdealBaseCase(g, r, delta, hyp);
+  return GenericInitialIdealBaseCase(g, es, delta, hyp);
 end intrinsic;
 
 intrinsic GinBaseCase(s::Rec) -> Any
