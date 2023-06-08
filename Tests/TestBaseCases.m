@@ -37,7 +37,18 @@ s := rec< RF | Genus := 3, StackyOrders := [], LogDegree := 0, IsHyperelliptic :
 GinBaseCase(s);
 
 // r=0, delta=0, g>=3, non-hyperelliptic
-s := rec< RF | Genus := 3, StackyOrders := [], LogDegree := 0, IsHyperelliptic := false>;
+s := rec< RF | Genus := 3, StackyOrders := [], LogDegree := 0, IsHyperelliptic := false >;
 GinBaseCase(s);
 
 // r>=1: with stacky points
+
+// r=1, delta=0, g=1
+s := rec< RF | Genus := 1, StackyOrders := [4], LogDegree := 0, IsHyperelliptic := true >;
+GinBaseCase(s);
+
+// r>=1, delta=0, g=0
+// Evan's code
+s := rec< RF | Genus := 0, StackyOrders := [4], LogDegree := 0, IsHyperelliptic := true >;
+GinBaseCase(s);
+
+// TODO: finish the g=0 delta \in {0,1} branch

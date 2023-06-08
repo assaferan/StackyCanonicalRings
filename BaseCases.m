@@ -215,10 +215,10 @@ end intrinsic;
 
 intrinsic GenericInitialIdealBaseCase(s::Rec) -> Any
   {}
-  g := s`genus;
-  es := s`stacky_orders;
-  delta := s`log_degree;
-  hyp := s`hyp;
+  g := s`Genus;
+  es := s`StackOrders;
+  delta := s`LogDegree;
+  hyp := s`IsHyperelliptic;
   return GenericInitialIdealBaseCase(g, es, delta, hyp);
 end intrinsic;
 
