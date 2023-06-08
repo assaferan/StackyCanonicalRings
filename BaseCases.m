@@ -1,4 +1,4 @@
-function gin_g_ge_3(g, hyp)
+function gin_g_ge_3_r_eq_0_d_eq_0(g, hyp)
 /***************************************************
 g >= 3, r = 0, delta = 0
 Generic initial ideal for a curve of genus >= 3 that 
@@ -37,9 +37,9 @@ is nonhyperelliptic and has  no stacky points and no log divisor.
 end function;
 
 
-function gin_g_le_3_r0_d0(g) -> Any
+function gin_g_le_2_r_eq_0_d_eq_0(g)
 /**************************************************  
-g <= 3, r = 0, delta = 0                                             
+g <= 2, r = 0, delta = 0                                             
 Generic initial ideal for a curve of genus <= 3 that 
 has no stacky points and no log divisor.
 **************************************************/                                               
@@ -63,7 +63,7 @@ has no stacky points and no log divisor.
 end function;
 
 
-function gin_g_eq_1_r0(delta) -> SeqEnum
+function gin_g_eq_1_r_eq_0(delta)
 /**************************************************
 g = 1, r = 0, delta = anything
 On input delta := deg(Delta) where Delta is a divisor on 
@@ -162,7 +162,7 @@ function LogDivisorDelta2NonHyperelliptic(h)
     return x_mons cat mons cat [y^2, x[h-2]^3*x[h-1]];
 end function;				 
 
-function LogDivisorDelta2(g, hyp)
+function gin_g_eq_2_r_eq_0_d_eq_2(g, hyp)
 /**************************************************
 g>=2, r=0, delta=2
 Returns the (pointed) generic initial ideal for a 
@@ -178,9 +178,27 @@ classical log divisor with delta = 2 and g ge 2.
 end function;
 
 
+intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::RngIntElt,hyp::BoolElt) -> SeqEnum
+{Returns the (pointed) generic initial ideal for the base cases in VZB} 
+    r := #e;
+    if r eq 0 then
+        if g eq 1 then
+            return gin_g_eq_1_r_eq_0(delta);
+        elif g eq 2 and delta eq 2 then  
+            gin_g_eq_2_r_eq_0_d_eq_2(g, hyp)
+        elif g le 2 and delta eq 0 then
+            return gin_g_le_2_r_eq_0_d_eq_0(g);
+        elif g ge 3 and delta eq 0 then
+            return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
+        end if;
 
+    elif r eq 1 then
+        if g eq 1 and delta eq 0 then
+            return gin_g_eq_1_r_eq_1_d_eq_0(e[1]);
+        end if;
 
-function GenericInitialIdealBaseCase(g,r,delta,hyp)
-    return 0;
-end function;
+    end if
+
+    Error("Information does not define a base case");
+end intrinsic;
                                                                                        
