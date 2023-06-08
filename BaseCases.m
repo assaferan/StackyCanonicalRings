@@ -27,10 +27,10 @@ is nonhyperelliptic and has  no stacky points and no log divisor.
         gens := [];
         for i := 1 to g-2 do
             for j := i to g-2 do
-                Append(~gens x[i]*x[j]);
-                Append(~gens y[i]*y[j]);
+                Append(~gens, x[i]*x[j]);
+                Append(~gens, y[i]*y[j]);
                 if [i, j] ne [g-2, g-2] then
-                    Append(~gens y[i]*x[j]);
+                    Append(~gens, y[i]*x[j]);
                 end if;
             end for;
         end for;

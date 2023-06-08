@@ -13,7 +13,7 @@ intrinsic IsBaseCase(s::Rec) -> BoolElt
   g := s`genus;
   r := #s`stacky_orders;
   delta := s`log_degree;
-  return IsBaseCase(g,e,delta)
+  return IsBaseCase(g,e,delta);
 end intrinsic;
 
 intrinsic IsBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::RngIntElt) -> SeqEnum
