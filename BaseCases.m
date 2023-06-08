@@ -183,23 +183,23 @@ end function;
 intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::RngIntElt,hyp::BoolElt) -> SeqEnum
   {Returns the (pointed) generic initial ideal for the base cases in VZB} 
 
-    assert IsBaseCase(g,e,delta);
+    //assert IsBaseCase(g,e,delta);
     r := #e;
     if r eq 0 then
-        if g eq 1 then
-            return gin_g_eq_1_r_eq_0(delta);
-        elif g eq 2 and delta eq 2 then  
-            gin_g_eq_2_r_eq_0_d_eq_2(g, hyp);
-        elif g le 2 and delta eq 0 then
-            return gin_g_le_2_r_eq_0_d_eq_0(g);
-        elif g ge 3 and delta eq 0 then
-          return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
-        end if;
+      if g eq 1 then
+        return gin_g_eq_1_r_eq_0(delta);
+      elif g eq 2 and delta eq 2 then  
+        return gin_g_eq_2_r_eq_0_d_eq_2(g, hyp);
+      elif g le 2 and delta eq 0 then
+        return gin_g_le_2_r_eq_0_d_eq_0(g);
+      elif g ge 3 and delta eq 0 then
+        return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
+      end if;
 
     elif r eq 1 then
-        if g eq 1 and delta eq 0 then
-            return gin_g_eq_1_r_eq_1_d_eq_0(e[1]);
-        end if;
+      if g eq 1 and delta eq 0 then
+        return gin_g_eq_1_r_eq_1_d_eq_0(e[1]);
+      end if;
 
     elif g eq 0 then
       can_ring_all_moving_pts(e);
@@ -216,7 +216,7 @@ end intrinsic;
 intrinsic GenericInitialIdealBaseCase(s::Rec) -> Any
   {}
   g := s`Genus;
-  es := s`StackOrders;
+  es := s`StackyOrders;
   delta := s`LogDegree;
   hyp := s`IsHyperelliptic;
   return GenericInitialIdealBaseCase(g, es, delta, hyp);

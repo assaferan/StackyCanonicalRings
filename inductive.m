@@ -8,9 +8,9 @@
 intrinsic IsBaseCase(s::Rec) -> BoolElt
   {Given a signature record, return true if the signature is one of the base cases; otherwise, return false. See Theorem 8.3.1 of JV-DZB.}
 
-  g := s`genus;
-  r := #s`stacky_orders;
-  delta := s`log_degree;
+  g := s`Genus;
+  e := s`StackyOrders;
+  delta := s`LogDegree;
   return IsBaseCase(g,e,delta);
 end intrinsic;
 
@@ -19,7 +19,6 @@ intrinsic IsBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::RngIntElt) -> Seq
   
   r := #e;
   if r eq 0 then return true; end if;
-  if g ge 2 then return false; end if;
   if (g eq 1) and (r + 2*delta lt 2) then return true; end if;
   if (g eq 0) and (delta lt 2) then return true; end if;
   return false;
@@ -48,7 +47,7 @@ intrinsic GinInductiveStep(s::Rec) -> Any
     // add new relations: Thm 8.3.1(b)
     new_rels := [];
     for i := 2 to e do
-      for j := 1 to m-1 do
+      for j := 1 to Rank(R)-1 do
         Append(~new_rels, y[i]*x[j]);
       end for;
     end for;
