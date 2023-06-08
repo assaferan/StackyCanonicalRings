@@ -1,3 +1,5 @@
+import "CanRingsQDiv.m": can_ring_info, can_ring_all_moving_pts;
+
 function gin_g_ge_3_r_eq_0_d_eq_0(g, hyp)
 /***************************************************
 g >= 3, r = 0, delta = 0
@@ -177,11 +179,12 @@ classical log divisor with delta = 2 and g ge 2.
   end if;
 end function;
 
+// this is the top-level intrinsic 
 intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::RngIntElt,hyp::BoolElt) -> SeqEnum
   {Returns the (pointed) generic initial ideal for the base cases in VZB} 
 
-    r := #e;
     assert IsBaseCase(g,e,delta);
+    r := #e;
     if r eq 0 then
         if g eq 1 then
             return gin_g_eq_1_r_eq_0(delta);
@@ -198,6 +201,8 @@ R           return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
             return gin_g_eq_1_r_eq_1_d_eq_0(e[1]);
         end if;
 
+    elif g eq 0 then
+      can_ring_all_moving_pts(e);
     end if
 
     Error("Information does not define a base case");
