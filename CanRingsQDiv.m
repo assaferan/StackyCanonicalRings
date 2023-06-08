@@ -191,8 +191,8 @@ function can_ring_info(alpha, points: Print := true, Factor := false)
     "Minimal relations: ", [Degree(r) : r in minbas];
   end if;
   
-  CRing := quo<Gback | back(minbas)>;
-  return CRing;
+  //CRing := quo<Gback | back(minbas)>;
+  return Gback, GeneratorsSequnce(Gback), back(minbas);
 end function;
 
 /*

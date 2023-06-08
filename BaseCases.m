@@ -33,7 +33,7 @@ is nonhyperelliptic and has  no stacky points and no log divisor.
             end for;
         end for;
     end if;
-    return gens;
+    return R, GeneratorsSequence(R), gens;
 end function;
 
 
@@ -46,20 +46,20 @@ has no stacky points and no log divisor.
     k := Rationals(); // base field
 
     if (g eq 0) then // trivial cases - these print out the rings and return an empty gin
-	R := k;
-	gens := [k | ];
+      R := k;
+      gens := [k | ];
     end if;
     
     if (g eq 1) then
-	R<u> := PolynomialRing(k);
-	gens := [k | ];
+      R<u> := PolynomialRing(k);
+      gens := [k | ];
     end if;
 
     if (g eq 2) then // genus 2 case
-	R<y,x,u> := PolynomialRing(k, [3,1,1]);
-	gens := [y^2];
-    end if;
-    return gens;
+      R<y,x,u> := PolynomialRing(k, [3,1,1]);
+      gens := [y^2];
+      end if;
+    return R, GeneratorsSequence(R), gens;
 end function;
 
 
@@ -75,26 +75,26 @@ X, we output the pointed generic initial ideal gin
         // Elliptic curve with Weiertsrass equation
         
          P<[x]> := PolynomialRing(k, [3,2,1]);
-         return [x[1]^2];
+         return P, GeneratorsSequence(P), [x[1]^2];
 
     elif delta eq 2 then
         // A degree 2 genus one curve (double cover of P1 ramified over 4 points)
         
         P<[x]> := PolynomialRing(k, [2,1,1]);
-        return [x[1]^2];
+        return P, GeneratorsSequence(P), [x[1]^2];
 
     elif delta eq 3 then
         // A degree 3 genus one curve (plane cubic)
 
         P<[x]> := PolynomialRing(k, [1,1,1]);
-        return [x[1]^3];
+        return P, GeneratorsSequence(P), [x[1]^3];
     else
         // An n-covering, genus one normal curve
         
         P<[x]> := PolynomialRing(k, [1 : 1 in [1..delta]]);
         l1 := [[x[i]*x[j] : i in [1..j-1] | <i,j> ne <delta-2, delta-1> ] : j in 1..delta-1];
         l2 := [x[delta-2]^2*x[delta-1]];
-        return l1 cat l2;
+        return P, GeneratorsSequence(P), l1 cat l2;
     end if;
 end function;
 
@@ -109,18 +109,18 @@ has one stacky point of order e and no log divisor.
     
     if (e eq 2) then
         P<[x]> := PolynomialRing(k, [6, 4, 1]);
-        return [x[1]^3];
+        return P, GeneratorsSequence(P), [x[1]^3];
 
     elif (e eq 3) then
         P<[x]> := PolynomialRing(k, [5, 3, 1]);
-        return [x[1]^2];
+        return P, GeneratorsSequence(P), [x[1]^2];
         
     elif (e eq 4) then
         P<[x]> := PolynomialRing(k, [4, 3, 1]);
-	return [x[2]^3];
+        return P, GeneratorsSequence(P), [x[2]^3];
 
     elif (e ge 5) then
-	R<[x]> := PolynomialRing(k, [d : d in [1..e]]]);
+        P<[x]> := PolynomialRing(k, [d : d in [1..e]]]);
     	gens := [];
     	for i in [3..e-1] do
       	    for j in [i..e-1] do
@@ -128,7 +128,7 @@ has one stacky point of order e and no log divisor.
       	    end for;
     	end for;
         
-    	return gens;
+    	return P, GeneratorsSequence(P), gens;
     end if;             
 end function;
 
@@ -144,7 +144,7 @@ function LogDivisorDelta2Hyperelliptic(h)
     x_mons := [x[i]*x[j] : i,j in [1..h-1] | i lt j];
     y_mons := [y[i]*y[j] : i,j in [1..h-2]];
     mons := [x[i]*y[j] : i,j in [1..h-2] | (i ne h-2) or (j ne h-2)];
-    return x_mons cat mons cat y_mons;
+    return R, GeneratorsSequence(R), x_mons cat mons cat y_mons;
 end function;
 
 function LogDivisorDelta2NonHyperelliptic(h) 
@@ -159,7 +159,7 @@ function LogDivisorDelta2NonHyperelliptic(h)
     x_mons_3 := [x[i]^2 * x[h-1] : i in [1..h-3]];
     x_mons := x_mons_2 cat x_mons_3;
     mons := [y*x[i] : i in [1..h-1]];
-    return x_mons cat mons cat [y^2, x[h-2]^3*x[h-1]];
+    return R, GeneratorsSequence(R), x_mons cat mons cat [y^2, x[h-2]^3*x[h-1]];
 end function;				 
 
 function gin_g_eq_2_r_eq_0_d_eq_2(g, hyp)
@@ -181,6 +181,7 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
   {Returns the (pointed) generic initial ideal for the base cases in VZB} 
 
     r := #e;
+    assert IsBaseCase(g,e,delta);
     if r eq 0 then
         if g eq 1 then
             return gin_g_eq_1_r_eq_0(delta);
@@ -189,7 +190,7 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
         elif g le 2 and delta eq 0 then
             return gin_g_le_2_r_eq_0_d_eq_0(g);
         elif g ge 3 and delta eq 0 then
-            return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
+R           return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
         end if;
 
     elif r eq 1 then
@@ -204,7 +205,7 @@ end intrinsic;
 
 intrinsic GinBaseCase(g::RngIntElt, e::SeqEnum, delta::RngIntElt, hyp::BoolElt) -> Any
   {}
-    return GenericInitialIdealBaseCase(g,e,delta,hyp);
+  return GenericInitialIdealBaseCase(g,e,delta,hyp);
 end intrinsic;
 
 intrinsic GenericInitialIdealBaseCase(s::Rec) -> Any
