@@ -1,10 +1,8 @@
-//RF := recformat< genus : RngIntElt, stacky_orders : SeqEnum, log_degree : RngIntElt>; // extra data like IsHyperelliptic, IsTrigonal, IsPlaneQuintic?
-
 /*
   To make a new record, write rec< RF | L >, where L is the field assignment list. E.g., 
 
-  RF := recformat< genus : RngIntElt, stacky_orders : SeqEnum, log_degree : RngIntElt, hyp : BoolElt>; // extra data like IsHyperelliptic, IsTrigonal, IsPlaneQuintic?
-  s := rec< RF | genus := 2, stacky_orders := [2,2,3,4], log_degree := 5, hyp := false >;
+  RF := recformat< Genus : RngIntElt, StackyOrders : SeqEnum, LogDegree : RngIntElt, IsHyperelliptic: BoolElt>; // extra data like IsTrigonal, IsPlaneQuintic?
+  s := rec< RF | Genus := 2, StackyOrders := [2,2,3,4], LogDegree := 5, IsHyperelliptic := false >;
 */
 
 intrinsic IsBaseCase(s::Rec) -> BoolElt
