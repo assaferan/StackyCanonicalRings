@@ -93,8 +93,8 @@ X, we output the pointed generic initial ideal gin
     else
         // An n-covering, genus one normal curve
         
-        P<[x]> := PolynomialRing(k, [1 : 1 in [1..delta]]);
-        l1 := [[x[i]*x[j] : i in [1..j-1] | <i,j> ne <delta-2, delta-1> ] : j in 1..delta-1];
+        P<[x]> := PolynomialRing(k, [1 : i in [1..delta]]);
+        l1 := [[x[i]*x[j] : i in [1..j-1] | <i,j> ne <delta-2, delta-1> ] : j in [1..delta-1]];
         l2 := [x[delta-2]^2*x[delta-1]];
         return P, GeneratorsSequence(P), l1 cat l2;
     end if;
@@ -122,7 +122,7 @@ has one stacky point of order e and no log divisor.
         return P, GeneratorsSequence(P), [x[2]^3];
 
     elif (e ge 5) then
-        P<[x]> := PolynomialRing(k, [d : d in [1..e]]]);
+        P<[x]> := PolynomialRing(k, [d : d in [1..e]]);
     	gens := [];
     	for i in [3..e-1] do
       	    for j in [i..e-1] do
@@ -189,11 +189,11 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
         if g eq 1 then
             return gin_g_eq_1_r_eq_0(delta);
         elif g eq 2 and delta eq 2 then  
-            gin_g_eq_2_r_eq_0_d_eq_2(g, hyp)
+            gin_g_eq_2_r_eq_0_d_eq_2(g, hyp);
         elif g le 2 and delta eq 0 then
             return gin_g_le_2_r_eq_0_d_eq_0(g);
         elif g ge 3 and delta eq 0 then
-R           return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
+          return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
         end if;
 
     elif r eq 1 then
@@ -203,9 +203,9 @@ R           return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
 
     elif g eq 0 then
       can_ring_all_moving_pts(e);
-    end if
+    end if;
 
-    Error("Information does not define a base case");
+    error "Information does not define a base case";
 end intrinsic;
 
 intrinsic GinBaseCase(g::RngIntElt, e::SeqEnum, delta::RngIntElt, hyp::BoolElt) -> Any
