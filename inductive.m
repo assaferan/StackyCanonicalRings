@@ -25,7 +25,7 @@ intrinsic InductiveStep(s::Rec) -> Rec
   return false;
 end intrinsic;
 
-intrinsic IterateInductiveStep(s::Rec) -> Rec
+intrinsic gin_inductive(s::Rec) -> Any 
   {}
 
   s_i := s;

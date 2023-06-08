@@ -177,10 +177,34 @@ classical log divisor with delta = 2 and g ge 2.
   end if;
 end function;
 
+intrinsic GenericInitialIdealBaseCase(g::RngIntElt, es::SeqEnum, delta::RngIntElt, hyp::BoolElt) -> Any
+  {}
 
-
-
-function GenericInitialIdealBaseCase(g,r,delta,hyp)
-    return 0;
-end function;
+  r := #es;
+  return 0;
+  if r ge 1 then
+    if (g eq 1) and (r eq 1) and (delta eq 0) then
+      return gin_g_eq_1_r_eq_1_d_eq_0(es[1]);
+    end if;
+  end if;
+ nd intrinsic;
                                                                                        
+intrinsic GinBaseCase(g::RngIntElt, r::RngIntElt, delta::RngIntElt, hyp::BoolElt) -> Any
+  {}
+    return GenericInitialIdealBaseCase(g,r,delta,hyp);
+end intrinsic;
+
+intrinsic GenericInitialIdealBaseCase(s::Rec) -> Any
+  {}
+  g := s`genus;
+  es := s`stacky_orders;
+  r := #es;
+  delta := s`log_degree;
+  hyp := s`hyp;
+  return GenericInitialIdealBaseCase(g, r, delta, hyp);
+end intrinsic;
+
+intrinsic GinBaseCase(s::Rec) -> Any
+  {}
+  return GenericInitialIdealBaseCase(s);
+end intrinsic;
