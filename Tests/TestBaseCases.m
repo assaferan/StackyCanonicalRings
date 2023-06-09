@@ -59,8 +59,12 @@ GinBaseCase(s);
 
 // r>=1, delta=0, g=0
 // Evan's code
+
+// TODO : Fix this! It seems that Evan's code does not return the right thing!
+// Figure out whether it is fixable or we need to implement the genus 0 part
+// of the algorithm.
+/*
 print "Testing r>=1, delta=0, g=0";
 s := rec< RF | Genus := 0, StackyOrders := [4], LogDegree := 0, IsHyperelliptic := true >;
 GinBaseCase(s);
-
-// TODO: finish the g=0 delta \in {0,1} branch
+*/

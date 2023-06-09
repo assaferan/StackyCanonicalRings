@@ -37,13 +37,19 @@ intrinsic GinInductiveStep(s::Rec) -> Any
     return GenericInitialIdealBaseCase(s);
   else
     s_new := s;
-    s_new`stacky_orders := s_new`stacky_orders[1..#s_new`stacky_orders];
-    e := s_new`stacky_orders[#s_new`stacky_orders];
-    R, gens, rels := $$(s_new); // recurse
+    e := s_new`StackyOrders[#s_new`StackyOrders];
+    s_new`StackyOrders := s_new`StackyOrders[1..#s_new`StackyOrders-1];
+    R<[x]>, gens, rels := $$(s_new); // recurse
     k := BaseRing(R);
-    R_new := PolynomialRing(k, Rank(R)+e- 1);
-    x := [* R_new.i : i in [1..Rank(R)] *];
-    y := [* "" *] cat [* R_new.i : i in [Rank(R)+1..Rank(R)+e-1] *];
+    m := #x;
+    assert Degree(x[m]) eq 1;
+    assert &and[x[m] lt x[i] : i in [1..m-1]];
+    R_new := PolynomialRing(k, [2..e] cat Grading(R));
+    y := [* "" *] cat [* R_new.i : i in [1..e-1] *];
+    x := [* R_new.i : i in [(e-1)+ 1..(e-1) + Rank(R)] *];
+    x_vars := [Sprintf("x[%o]", i) : i in [1..Rank(R)]];
+    y_vars := [Sprintf("y[%o]", i) : i in [2..e]];
+    AssignNames(~R_new, y_vars cat x_vars);
     // add new relations: Thm 8.3.1(b)
     new_rels := [];
     for i := 2 to e do
@@ -62,4 +68,9 @@ intrinsic GinInductiveStep(s::Rec) -> Any
     //rec_cnt +:= 1;
   end if;
   return false;
+end intrinsic;
+
+intrinsic GinLogStackyCurve(s::Rec) -> Any
+{Return the generic initial ideal of a log stacky curve.}
+  return GinInductiveStep(s);
 end intrinsic;
