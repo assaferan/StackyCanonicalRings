@@ -182,17 +182,27 @@ end function;
 // this is the top-level intrinsic 
 intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::RngIntElt,hyp::BoolElt) -> SeqEnum
   {Returns the (pointed) generic initial ideal for the base cases in VZB} 
-
-    if g eq 0 then
-       return can_ring_all_moving_pts(e cat [1 : i in [1..delta]]);
-    end if;
   
+    k := Rationals();
     //assert IsBaseCase(g,e,delta);
     r := #e;
+
+    if (g eq 0) then
+	// cases not handled by Evan's code
+	if (r eq 0) and (delta le 3) then
+	    // In this case, the canonical ring is simply 
+	    // the polynomial ring in (delta-1) variables
+	    R<[x]> := PolynomialRing(k, Maximum(delta-1,0));
+	    gens := [k | ];
+
+	    return R, GeneratorsSequence(R), gens;;
+	end if;
+	
+	return can_ring_all_moving_pts(e cat [1 : i in [1..delta-2]]);
+    end if;
+
     if r eq 0 then
-      if g eq 0 then
-        return can_ring_all_moving_pts(e);
-      elif g eq 1 then
+      if g eq 1 then
         return gin_g_eq_1_r_eq_0(delta);
       elif g eq 2 and delta eq 2 then  
         return gin_g_eq_2_r_eq_0_d_eq_2(g, hyp);
@@ -203,9 +213,7 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
       end if;
 
     elif r eq 1 then
-      if g eq 0 then
-        return can_ring_all_moving_pts(e);
-      elif g eq 1 and delta eq 0 then
+      if g eq 1 and delta eq 0 then
         return gin_g_eq_1_r_eq_1_d_eq_0(e[1]);
       end if;
     end if;

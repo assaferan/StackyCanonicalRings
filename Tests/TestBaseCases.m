@@ -3,14 +3,13 @@ RF := recformat< Genus : RngIntElt, StackyOrders : SeqEnum, LogDegree : RngIntEl
 
 // r=0: no stacky points
 
-// TODO: fix this
+
 // r=0, delta>0, g=0
 // Evan's code
-/*
+
 print "Testing r=0, delta>0, g=0";
 s := rec< RF | Genus := 0, StackyOrders := [], LogDegree := 3, IsHyperelliptic := false >;
 GinBaseCase(s);
-*/
 
 // r=0, delta>0
 
