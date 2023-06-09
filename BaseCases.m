@@ -94,7 +94,7 @@ X, we output the pointed generic initial ideal gin
         // An n-covering, genus one normal curve
         
         P<[x]> := PolynomialRing(k, [1 : i in [1..delta]]);
-        l1 := [[x[i]*x[j] : i in [1..j-1] | <i,j> ne <delta-2, delta-1> ] : j in [1..delta-1]];
+        l1 := &cat [[x[i]*x[j] : i in [1..j-1] | <i,j> ne <delta-2, delta-1> ] : j in [1..delta-1]];
         l2 := [x[delta-2]^2*x[delta-1]];
         return P, GeneratorsSequence(P), l1 cat l2;
     end if;
@@ -134,10 +134,64 @@ has one stacky point of order e and no log divisor.
     end if;             
 end function;
 
+function LogDivisorDelta1Hyperelliptic(g) 
+    k := Rationals();
+    R := PolynomialRing(k, [3] cat [2 : i in [1..g]] cat [1 : i in [1..g]]);
+    y_vars := [Sprintf("y[%o]", i) : i in [1..g]];
+    x_vars := [Sprintf("x[%o]", i) : i in [1..g]];
+    AssignNames(~R, ["z"] cat y_vars cat x_vars);
+    z := [R.1];
+    y := [R.i : i in [1+1..1+g]];
+    x := [R.i : i in [(1+g) + 1..(1+g) + g]];
+    x_mons := [x[i]*x[j] : i,j in [1..g-1] | i lt j];
+    yx_mons := [y[i]*x[j] : i,j in [1..g-1]];
+    y_mons := [y[i]*y[j] : i,j in [1..g] | (i le j) and ((i ne g) or (j ne g))];
+    zx_mons := [z*x[i] : i in [1..g-1]];
+    y2x_mons := [y[g]^2*x[i] : i in [1..g-1]];
+    zy_mons := [z*y[i] : i in [1..g-1]];
+    all_mons := x_mons cat yx_mons cat y_mons;
+    all_mons cat:= zx_mons cat y2x_mons cat zy_mons;
+    return R, GeneratorsSequence(R), all_mons cat [z^2];
+end function;
+
+function LogDivisorDelta1NonHyperelliptic(g) 
+    k := Rationals();
+    R := PolynomialRing(k, [3] cat [2 : i in [1..2]] cat [1 : i in [1..g]]);
+    y_vars := [Sprintf("y[%o]", i) : i in [1..2]];
+    x_vars := [Sprintf("x[%o]", i) : i in [1..g]];
+    AssignNames(~R, ["z"] cat y_vars cat x_vars);
+    z := [R.1];
+    y := [R.i : i in [1+1..1+2]];
+    x := [R.i : i in [(1+2) + 1..(1+2) + g]];
+    x_mons := [x[i]*x[j] : i,j in [1..g-2] | i lt j];
+    yx_mons := [y[i]*x[j] : i in [1..2], j in [1..g-1]];
+    x2x_mons := [x[i]^2*x[g-1] : i in [1..g-3]];
+    y_mons := [y[1]^2, y[1]*y[2]];
+    x3x_mons := [x[g-2]^3*x[g-1]];
+    zx_mons := [z*x[i] : i in [1..g-1]];
+    zy_mons := [z*y[1]];
+    all_mons := x_mons cat yx_mons cat x2x_mons cat y_mons;
+    all_mons cat:= x3x_mons cat zx_mons cat zy_mons;
+    return R, GeneratorsSequence(R), all_mons cat [z^2];
+end function;
+
+function gin_g_ge_2_r_eq_0_d_eq_1(g, hyp)
+/**************************************************
+g>=2, r=0, delta=1
+Returns the (pointed) generic initial ideal for a 
+classical log divisor with delta = 1 and g ge 2.
+**************************************************/
+  assert g ge 2;
+  if hyp then
+      return LogDivisorDelta1Hyperelliptic(g);
+  else
+      return LogDivisorDelta1NonHyperelliptic(g);
+  end if;
+end function;
 
 function LogDivisorDelta2Hyperelliptic(h) 
     k := Rationals();
-    R := PolynomialRing(k, 2*h-2);
+    R := PolynomialRing(k, [2 : i in [1..h-2]] cat [1 : i in [1..h]]);
     y_vars := [Sprintf("y[%o]", i) : i in [1..h-2]];
     x_vars := [Sprintf("x[%o]", i) : i in [1..h]];
     AssignNames(~R, y_vars cat x_vars);
@@ -151,7 +205,7 @@ end function;
 
 function LogDivisorDelta2NonHyperelliptic(h) 
     k := Rationals();
-    R := PolynomialRing(k, 2*h-2);
+    R := PolynomialRing(k, [2] cat [1 : i in [1..h]]);
     y_vars := ["y"];
     x_vars := [Sprintf("x[%o]", i) : i in [1..h]];
     AssignNames(~R, y_vars cat x_vars);
@@ -164,7 +218,7 @@ function LogDivisorDelta2NonHyperelliptic(h)
     return R, GeneratorsSequence(R), x_mons cat mons cat [y^2, x[h-2]^3*x[h-1]];
 end function;				 
 
-function gin_g_eq_2_r_eq_0_d_eq_2(g, hyp)
+function gin_g_ge_2_r_eq_0_d_eq_2(g, hyp)
 /**************************************************
 g>=2, r=0, delta=2
 Returns the (pointed) generic initial ideal for a 
@@ -177,6 +231,24 @@ classical log divisor with delta = 2 and g ge 2.
   else
       return LogDivisorDelta2NonHyperelliptic(h);
   end if;
+end function;
+
+function gin_g_ge_2_r_eq_0_d_ge_3(g, delta)
+/**************************************************
+g>=2, r=0, delta>=3
+Returns the (pointed) generic initial ideal for a 
+classical log divisor with delta >= 3 and g ge 2.
+**************************************************/
+  assert g ge 2;
+  assert delta ge 3;
+  h := g + delta - 1;
+  k := Rationals();
+  R<[x]> := PolynomialRing(k, h);
+  x_mons_2 := [x[i]*x[j] : i,j in [1..h-2] | i lt j];
+  x_mons_2 cat:= [x[i] * x[h-1] : i in [1..h-3]];
+  x_mons_3 := [x[i]^2 * x[h-1] : i in [delta-2..h-2]];
+  x_mons := x_mons_2 cat x_mons_3;
+  return R, GeneratorsSequence(R), x_mons;
 end function;
 
 // this is the top-level intrinsic 
@@ -203,13 +275,18 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
 
     if r eq 0 then
       if g eq 1 then
-        return gin_g_eq_1_r_eq_0(delta);
-      elif g eq 2 and delta eq 2 then  
-        return gin_g_eq_2_r_eq_0_d_eq_2(g, hyp);
+          return gin_g_eq_1_r_eq_0(delta);
       elif g le 2 and delta eq 0 then
-        return gin_g_le_2_r_eq_0_d_eq_0(g);
+          return gin_g_le_2_r_eq_0_d_eq_0(g);
+      elif g ge 2 and delta eq 1 then  
+          return gin_g_ge_2_r_eq_0_d_eq_2(g, hyp);
+      elif g ge 2 and delta eq 2 then  
+          return gin_g_ge_2_r_eq_0_d_eq_2(g, hyp);
+      elif g ge 2 and delta ge 3 then
+	  return gin_g_ge_2_r_eq_0_d_ge_3(g, delta);
+      
       elif g ge 3 and delta eq 0 then
-        return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
+          return gin_g_ge_3_r_eq_0_d_eq_0(g, hyp);
       end if;
 
     elif r eq 1 then
