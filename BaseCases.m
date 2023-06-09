@@ -190,7 +190,9 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
     //assert IsBaseCase(g,e,delta);
     r := #e;
     if r eq 0 then
-      if g eq 1 then
+      if g eq 0 then
+        return can_ring_all_moving_pts(e);
+      elif g eq 1 then
         return gin_g_eq_1_r_eq_0(delta);
       elif g eq 2 and delta eq 2 then  
         return gin_g_eq_2_r_eq_0_d_eq_2(g, hyp);
@@ -201,10 +203,11 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
       end if;
 
     elif r eq 1 then
-      if g eq 1 and delta eq 0 then
+      if g eq 0 then
+        return can_ring_all_moving_pts(e);
+      elif g eq 1 and delta eq 0 then
         return gin_g_eq_1_r_eq_1_d_eq_0(e[1]);
       end if;
-      
     end if;
 
     error "Information does not define a base case";
