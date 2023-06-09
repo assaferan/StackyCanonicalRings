@@ -48,7 +48,7 @@ has no stacky points and no log divisor.
     k := Rationals(); // base field
 
     if (g eq 0) then // trivial cases - these print out the rings and return an empty gin
-      R := k;
+      R := PolynomialRing(k,0);
       gens := [k | ];
     end if;
     
@@ -183,6 +183,10 @@ end function;
 intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::RngIntElt,hyp::BoolElt) -> SeqEnum
   {Returns the (pointed) generic initial ideal for the base cases in VZB} 
 
+    if g eq 0 then
+       return can_ring_all_moving_pts(e cat [1 : i in [1..delta]]);
+    end if;
+  
     //assert IsBaseCase(g,e,delta);
     r := #e;
     if r eq 0 then
@@ -200,9 +204,7 @@ intrinsic GenericInitialIdealBaseCase(g::RngIntElt,e::SeqEnum[RngIntElt],delta::
       if g eq 1 and delta eq 0 then
         return gin_g_eq_1_r_eq_1_d_eq_0(e[1]);
       end if;
-
-    elif g eq 0 then
-      can_ring_all_moving_pts(e);
+      
     end if;
 
     error "Information does not define a base case";
