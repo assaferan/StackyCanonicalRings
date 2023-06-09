@@ -192,7 +192,7 @@ function can_ring_info(alpha, points: Print := true, Factor := false)
   end if;
   
   //CRing := quo<Gback | back(minbas)>;
-  return Gback, GeneratorsSequnce(Gback), back(minbas);
+  return Gback, GeneratorsSequence(Gback), back(minbas);
 end function;
 
 /*
@@ -247,10 +247,12 @@ end procedure;
 /*
 Test cases.
 */
+/*
 can_ring_info([1/2, 2/3, 6/7 - 2], [0/1, 1]: Print := false, Factor := true);
 Qsqrt3<sqrt3> := RadicalExtension(Rationals(), 2, 3);
 can_ring_info([1/3, 1/5, 1/4, 1/4 - 1], [0, 1, sqrt3]: Print := false);
 can_ring_one_moving_pt([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
 can_ring_all_moving_pts([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5]);
 can_ring_info([-1/2, -1/2, 1/3, 1/3, 1/5, 1/5], [7/3,0,1,2,3]: Factor := true);
-close_cases(4, 3)
+close_cases(4, 3);
+*/
