@@ -106,9 +106,11 @@ function can_ring_info(alpha, points: Print := true, Factor := false)
         ringchg := true;
         coor := Coordinates(W,monvecs[i]);
         newden := Lcm([Denominator(c) : c in coor]);
+        /*
         if Factor then
           denom := Lcm(denom, newden);
         end if;
+        */
         Append(~initials, mons[i]);
         Append(~rels, newden*(mons[i] - &+[coor[i] * mons[gen_idxs[i]] :
         i in [1..#coor]]));
@@ -150,9 +152,11 @@ function can_ring_info(alpha, points: Print := true, Factor := false)
       ringchg := true;
     end if;
     
+    /*
     if Factor then
       denom := Lcm([denom,Numerator(Determinant(Matrix(monvecs[gen_idxs])))]);
     end if;
+    */
     
     if (ringchg) then
       // Check if we're done
@@ -179,6 +183,7 @@ function can_ring_info(alpha, points: Print := true, Factor := false)
     print back(initials);
     /* "Relations are:";
     print back(rels); */
+    /*
     if Factor then
       fac := Factorization(denom);
       for rec in fac do
@@ -188,6 +193,7 @@ function can_ring_info(alpha, points: Print := true, Factor := false)
         end if;
       end for;
     end if;
+    */
     "Minimal relations: ", [Degree(r) : r in minbas];
   end if;
   
